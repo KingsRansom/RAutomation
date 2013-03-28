@@ -3,7 +3,7 @@ module RAutomation
     module Win32
       class Keys
         KEYS = {
-          # keycodes from http://msdn.microsoft.com/en-us/library/ms927178.aspx Added backslash because :P
+          # keycodes from http://msdn.microsoft.com/en-us/library/ms927178.aspx
           :null         => 0x00,
           :cancel       => 0x03,
           :help         => 0x2F,
