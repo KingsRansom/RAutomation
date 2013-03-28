@@ -3,7 +3,7 @@ module RAutomation
     module Win32
       class Keys
         KEYS = {
-          # keycodes from http://msdn.microsoft.com/en-us/library/ms927178.aspx
+          # keycodes from http://msdn.microsoft.com/en-us/library/ms927178.aspx Added backslash because :P
           :null         => 0x00,
           :cancel       => 0x03,
           :help         => 0x2F,
@@ -65,6 +65,7 @@ module RAutomation
           :f10          => 0x79,
           :f11          => 0x7A,
           :f12          => 0x7B,
+          :backslash    => 0xDC,
         }            
 
         SPECIAL_KEYS = {
@@ -83,11 +84,15 @@ module RAutomation
           "{"   => 0x5B,
           "}"   => 0x5D,
           ":"   => 0x3B,
+          "]"   => 0xDD,
+          "["   => 0xDB,
           "\""  => 0x27,
           "|"   => 0x5C,
           "?"   => 0x2F,
           ">"   => 0x2E,
-          "<"   => 0x2C
+          "<"   => 0x2C,
+          "\\"  => 0xDC,
+          "-"   => 0x6D,
         }
 
         def self.[](key)
