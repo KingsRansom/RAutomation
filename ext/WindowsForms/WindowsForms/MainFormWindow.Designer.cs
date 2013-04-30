@@ -67,8 +67,6 @@
             this.toToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.aboutToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.treeView = new System.Windows.Forms.TreeView();
-            this.multiLineTextField = new System.Windows.Forms.TextBox();
-            this.automatableMonthCalendar1 = new WindowsForms.AutomatableMonthCalendar();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.menuStrip1.SuspendLayout();
@@ -343,7 +341,7 @@
             this.faileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(657, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(724, 24);
             this.menuStrip1.TabIndex = 15;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -406,29 +404,11 @@
             this.treeView.Size = new System.Drawing.Size(159, 177);
             this.treeView.TabIndex = 16;
             // 
-            // multiLineTextField
-            // 
-            this.multiLineTextField.Location = new System.Drawing.Point(142, 339);
-            this.multiLineTextField.Multiline = true;
-            this.multiLineTextField.Name = "multiLineTextField";
-            this.multiLineTextField.Size = new System.Drawing.Size(325, 123);
-            this.multiLineTextField.TabIndex = 5;
-            // 
-            // automatableMonthCalendar1
-            // 
-            this.automatableMonthCalendar1.Location = new System.Drawing.Point(142, 474);
-            this.automatableMonthCalendar1.MaxSelectionCount = 1;
-            this.automatableMonthCalendar1.Name = "automatableMonthCalendar1";
-            this.automatableMonthCalendar1.TabIndex = 17;
-            this.automatableMonthCalendar1.DateChanged += new System.Windows.Forms.DateRangeEventHandler(this.automatableMonthCalendar1_DateChanged);
-            // 
             // MainFormWindow
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(657, 657);
-            this.Controls.Add(this.automatableMonthCalendar1);
-            this.Controls.Add(this.multiLineTextField);
+            this.ClientSize = new System.Drawing.Size(724, 474);
             this.Controls.Add(this.treeView);
             this.Controls.Add(this.FruitListBox);
             this.Controls.Add(this.textBoxDisabled);
@@ -494,8 +474,6 @@
         private System.Windows.Forms.ToolStripMenuItem toToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem aboutToolStripMenuItem1;
         private System.Windows.Forms.TreeView treeView;
-        private System.Windows.Forms.TextBox multiLineTextField;
-        private AutomatableMonthCalendar automatableMonthCalendar1;
     }
 }
 

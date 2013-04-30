@@ -1,6 +1,4 @@
 #pragma once
-#include "StringHelper.h"
-
 using namespace System::Windows::Automation;
 
 public ref class MenuItemSelector
