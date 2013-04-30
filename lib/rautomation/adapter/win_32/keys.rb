@@ -2,8 +2,10 @@ module RAutomation
   module Adapter
     module Win32
       class Keys
+        attr_accessor :KEYS
+        attr_accessor :SPECIAL_KEYS
         KEYS = {
-          # keycodes from http://msdn.microsoft.com/en-us/library/ms927178.aspx
+          # keycodes from http://msdn.microsoft.com/en-us/library/ms927178.aspx Added backslash because :P
           :null         => 0x00,
           :cancel       => 0x03,
           :help         => 0x2F,
@@ -35,7 +37,8 @@ module RAutomation
           :arrow_down   => 0x28,
           :insert       => 0x2D,
           :delete       => 0x2E,
-          :semicolon    => 0x3B,
+          :semicolon    => 0xBA,
+          :colon        => 0X3A,
           :equals       => 0x3D,
           :numpad0      => 0x60,
           :numpad1      => 0x61,
@@ -67,7 +70,7 @@ module RAutomation
           :f12          => 0x7B,
           :backslash    => 0xDC,
         }            
-
+#
         SPECIAL_KEYS = {
           "!"   => 0x31,
           "@"   => 0x32,
@@ -84,14 +87,11 @@ module RAutomation
           "{"   => 0x5B,
           "}"   => 0x5D,
           ":"   => 0x3B,
-          "]"   => 0xDD,
-          "["   => 0xDB,
           "\""  => 0x27,
           "|"   => 0x5C,
           "?"   => 0x2F,
           ">"   => 0x2E,
           "<"   => 0x2C,
-          "\\"  => 0xDC,
           "-"   => 0x6D,
         }
 
@@ -111,7 +111,6 @@ module RAutomation
             converted
           end
         end
-
         def self.encode_str(keys)
           keys.to_s.split("").map do |key|
             key =~ /[a-z]/ ? key.upcase.unpack("c")[0] : 
