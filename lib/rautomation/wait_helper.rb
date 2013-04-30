@@ -6,7 +6,6 @@ module RAutomation
     class TimeoutError < StandardError
     end
 
-    # @private
     # Wait until the block evaluates to true or times out.
     def wait_until(timeout = Window.wait_timeout, &block)
       end_time = ::Time.now + timeout

@@ -24,6 +24,7 @@ module RAutomation
         end
 
         load_autoit
+        puts "we loaded autoit"
         @@autoit.AutoItSetOption("WinWaitDelay", 350)
 
         # Locators of the window.

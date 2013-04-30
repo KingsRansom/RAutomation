@@ -8,6 +8,7 @@ module RAutomation
       module Functions
         extend FFI::Library
 
+        # TODO once done adapt the path to the DLL (somewhere in the packaged gem)
         ffi_lib 'user32', 'kernel32', 'ole32', File.dirname(__FILE__) + '/../../../../ext/IAccessibleDLL/Release/iaccessibleDll.dll'
         ffi_convention :stdcall
 
@@ -84,6 +85,8 @@ module RAutomation
                         [:long, :long, :pointer, :long, :pointer], :void
         attach_function :select_table_row, :select_table_row,
                         [:long, :long, :long], :void
+        attach_function :get_table_row_state, :get_table_row_state,
+                        [:long, :long, :long], :long
 
         class << self
 
@@ -227,17 +230,30 @@ module RAutomation
           def retrieve_combobox_item_text(control_hwnd, item_no)
             text_len = 1024
             string_buffer = FFI::MemoryPointer.new :char, text_len
-            UiaDll::select_list_value_at control_hwnd, item_no, string_buffer, text_len
+            UiaDll::get_combobox_value control_hwnd, item_no, string_buffer, text_len
             string_buffer.read_string
           end
 
           def control_name(control_hwnd)
             string_buffer = FFI::MemoryPointer.new :char, 255
-            if (UiaDll::get_control_name(control_hwnd, string_buffer, 255))
+            if (get_control_name(control_hwnd, string_buffer) == Constants::S_OK)
               string_buffer.read_string
             else
               fail "Cannot get name for control with HWND 0x" + control_hwnd.to_s(16)
             end
+          end
+
+          def retrieve_table_strings_for_row(control_hwnd, row)
+            hModule = load_library("oleacc.dll") # TODO should be done only one time
+
+            strings_ptr = FFI::MemoryPointer.new :pointer
+            columns_ptr = FFI::MemoryPointer.new :pointer
+
+            get_table_row_strings(hModule, control_hwnd, strings_ptr, row, columns_ptr)
+            str_ptr = strings_ptr.read_pointer
+            columns = columns_ptr.read_long
+
+            str_ptr.get_array_of_string(0, columns)
           end
 
           private

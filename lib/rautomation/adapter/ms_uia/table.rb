@@ -13,11 +13,11 @@ module RAutomation
         end
 
         def exists?
-          UiaDll::table_coordinate_valid? hwnd, row, column
+          UiaDll::data_item_exists hwnd, row, column
         end
 
         def value
-          UiaDll::table_value_at hwnd, row, column
+          UiaDll::cell_value_at hwnd, row, column
         end
 
         alias_method :text, :value
@@ -51,11 +51,11 @@ module RAutomation
         end
 
         def value
-          UiaDll::table_value_at @hwnd, @locators[:index]
+          UiaDll::cell_value_at @hwnd, @locators[:index]
         end
 
         def exists?
-          UiaDll::table_coordinate_valid?(@hwnd, @locators[:index])
+          UiaDll::data_item_exists(@hwnd, @locators[:index])
         end
 
         def self.locators_match?(locators, item)
@@ -87,25 +87,60 @@ module RAutomation
         end
 
         def strings
-          headers = UiaDll.table_headers(hwnd)
-          values = UiaDll.table_values(hwnd)
-          return values if headers.empty?
+          rows = []
+          header_columns = []
 
-          all_strings = [] << headers
-          values.each_slice(headers.count) {|r| all_strings << r }
-          all_strings
+          raise "Not a list control" unless of_type_table?
+
+
+          children_count = count_children(uia_element)
+
+          children = FFI::MemoryPointer.new :pointer, children_count
+          UiaDll::find_children(uia_element, children)
+
+
+          children.read_array_of_pointer(children_count).each do |child|
+            grandchildren_count = count_children(child)
+
+            if grandchildren_count > 0
+
+              grandchildren = FFI::MemoryPointer.new :pointer, grandchildren_count
+              UiaDll::find_children(child, grandchildren)
+
+              grandchildren.read_array_of_pointer(grandchildren_count).each do |grandchild|
+                grandchild_name = FFI::MemoryPointer.new :char, UiaDll::get_name(grandchild, nil) + 1
+                UiaDll::get_name(grandchild, grandchild_name)
+                header_columns.push grandchild_name.read_string
+              end
+            else
+              grandchild_name = FFI::MemoryPointer.new :char, UiaDll::get_name(child, nil) + 1
+              UiaDll::get_name(child, grandchild_name)
+              header_columns = grandchild_name.read_string
+            end
+
+            rows.push header_columns
+            header_columns = []
+          end
+
+          rows
         end
 
-        def select(which_item)
-          UiaDll::table_select hwnd, which_item
+#        def select(row)
+#          Functions.select_table_row(Window.oleacc_module_handle, Functions.control_hwnd(@window.hwnd, @locators), row)
+#        end
+
+        def select(index)
+          UiaDll::select_data_item hwnd, index - 1
         end
 
-        def selected?(which_item)
-          UiaDll::table_row_is_selected hwnd, which_item
+        #todo - replace with UIA version
+        def selected?(row)
+          state = Functions.get_table_row_state(Window.oleacc_module_handle, hwnd, row)
+          state & Constants::STATE_SYSTEM_SELECTED != 0
         end
 
         def row_count
-          UiaDll::table_row_count hwnd
+          UiaDll::get_data_item_count hwnd
         end
 
         def exist?

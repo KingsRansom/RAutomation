@@ -5,6 +5,7 @@ module RAutomation
       module Functions
         extend FFI::Library
 
+        # TODO once done adapt the path to the DLL (somewhere in the packaged gem)
         ffi_lib 'user32', 'kernel32', 'ole32', File.dirname(__FILE__) + '/../../../../ext/IAccessibleDLL/Release/iaccessibleDll.dll'
         ffi_convention :stdcall
 
@@ -239,6 +240,28 @@ module RAutomation
             string_buffer = FFI::MemoryPointer.new :char, text_len
             send_message(control_hwnd, Constants::CB_GETLBTEXT, item_no, string_buffer)
             string_buffer.read_string
+          end
+
+          def control_name(control_hwnd)
+            string_buffer = FFI::MemoryPointer.new :char, 255
+            if (get_control_name(control_hwnd, string_buffer) == Constants::S_OK)
+              string_buffer.read_string
+            else
+              fail "Cannot get name for control with HWND 0x" + control_hwnd.to_s(16)
+            end
+          end
+
+          def retrieve_table_strings_for_row(control_hwnd, row)
+            hModule = load_library("oleacc.dll") # TODO should be done only one time
+
+            strings_ptr = FFI::MemoryPointer.new :pointer
+            columns_ptr = FFI::MemoryPointer.new :pointer
+
+            get_table_row_strings(hModule, control_hwnd, strings_ptr, row, columns_ptr)
+            str_ptr = strings_ptr.read_pointer
+            columns = columns_ptr.read_long
+
+            str_ptr.get_array_of_string(0, columns)
           end
 
           private

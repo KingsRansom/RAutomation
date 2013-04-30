@@ -10,6 +10,17 @@ module RAutomation
 
         has_many :controls
 
+        #todo - figure out what this is for and see if MsUia still needs it
+        class << self
+          def oleacc_module_handle
+            @oleacc_module_handle ||= begin
+              oleacc = Functions.load_library "oleacc.dll"
+              Functions.co_initialize nil
+              oleacc
+            end
+          end
+        end
+
         # Locators of the window.
         attr_reader :locators
 
@@ -167,10 +178,6 @@ module RAutomation
           Button.new(self, locator)
         end
 
-        def value_control(locator)
-          ValueControl.new(self, locator)
-        end
-
         # @see TextField#initialize
         # @see RAutomation::Window#text_field
         def text_field(locator)
@@ -212,6 +219,38 @@ module RAutomation
 
         def new_pid
           UiaDll::current_process_id(uia_control())
+        end
+
+        def display_tree
+          root_element = UiaDll::element_from_handle(hwnd)
+
+          root_name = FFI::MemoryPointer.new :char, UiaDll::get_name(root_element, nil) + 1
+          UiaDll::get_name(root_element, root_name)
+
+          [root_name.read_string.inspect, gather_children(root_element)]
+        end
+
+        def gather_children(root_element)
+          element_tree = []
+
+          child_count = count_children(root_element)
+          children = FFI::MemoryPointer.new :pointer, child_count
+          UiaDll::find_children(root_element, children)
+
+          children.read_array_of_pointer(child_count).each do |child|
+            child_name = FFI::MemoryPointer.new :char, UiaDll::get_name(child, nil) + 1
+            UiaDll::get_name(child, child_name)
+
+            grandchild_count = count_children(child)
+
+            if grandchild_count > 0
+              element_tree << [child_name.read_string, gather_children(child)]
+            else
+              element_tree << child_name.read_string
+            end
+          end
+
+          element_tree
         end
 
         def count_children(element)

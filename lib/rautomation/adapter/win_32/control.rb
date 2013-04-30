@@ -28,7 +28,7 @@ module RAutomation
         end
 
         def click
-          assert_enabled
+          #assert_enabled
           clicked = false
           wait_until do
             @window.activate
@@ -62,7 +62,7 @@ module RAutomation
         end
 
         def focus
-          assert_enabled
+          #assert_enabled
           @window.activate
           Functions.set_control_focus hwnd
         end
