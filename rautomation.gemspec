@@ -14,8 +14,8 @@ RAutomation provides:
   supported platforms or technologies}
   s.homepage = %q{http://github.com/jarmo/RAutomation}
   s.summary = %q{Automate windows and their controls through user-friendly API with Ruby}
-  
-  s.files         = `git ls-files`.split("\n") + ext_binaries
+
+  s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- spec/*`.split("\n")
   s.require_paths = ["lib"]  
 
