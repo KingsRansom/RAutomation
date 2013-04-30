@@ -26,7 +26,6 @@ tmtags
 
 ## VisualStudio
 Debug
-Release
 ipch
 *.sdf
 *.suo
