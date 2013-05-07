@@ -73,7 +73,6 @@ module RAutomation
           :dash          => 0xBD,
           :slash         => 0x6F,
           :backslash     => 0xDC
-          :backslash    => 0xDC,
         }            
 #
         SPECIAL_KEYS = {
