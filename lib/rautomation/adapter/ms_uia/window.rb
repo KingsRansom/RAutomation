@@ -10,17 +10,6 @@ module RAutomation
 
         has_many :controls
 
-        #todo - figure out what this is for and see if MsUia still needs it
-        class << self
-          def oleacc_module_handle
-            @oleacc_module_handle ||= begin
-              oleacc = Functions.load_library "oleacc.dll"
-              Functions.co_initialize nil
-              oleacc
-            end
-          end
-        end
-
         # Locators of the window.
         attr_reader :locators
 
@@ -64,15 +53,8 @@ module RAutomation
 
         # @see RAutomation::Window#class_names
         def class_names
-          root_element = UiaDll::element_from_handle(hwnd)
-
-          root_class = FFI::MemoryPointer.new :char, UiaDll::get_class_name(root_element, nil) + 1
-          UiaDll::get_class_name(root_element, root_class)
-
-          classes = gather_children_classes(root_element)
-          classes = classes.flatten
-          classes.delete("")
-          classes.sort
+          classes = UiaDll::children_class_names(UiaDll::SearchCriteria.from_locator(hwnd, :hwnd => hwnd))
+          classes.delete_if(&:empty?).sort
         end
 
         # @see RAutomation::Window#activate
@@ -178,6 +160,10 @@ module RAutomation
           Button.new(self, locator)
         end
 
+        def value_control(locator)
+          ValueControl.new(self, locator)
+        end
+
         # @see TextField#initialize
         # @see RAutomation::Window#text_field
         def text_field(locator)
@@ -196,92 +182,8 @@ module RAutomation
           Functions.respond_to?(name) ? Functions.send(name, *args) : super
         end
 
-        # MsUia adapter specific API methods
-        def element
-          case
-            when @locators[:focus]
-              uia_control = UiaDll::get_focused_element
-            when @locators[:id]
-              uia_control = UiaDll::find_window(@locators[:id].to_s)
-              raise UnknownElementException, "#{@locators[:id]} does not exist" if uia_control.nil?
-            when @locators[:point]
-              uia_control = UiaDll::element_from_point(@locators[:point][0], @locators[:point][1])
-              raise UnknownElementException, "#{@locators[:point]} does not exist" if uia_control.nil?
-            else
-              hwnd = find_hwnd(locators, window_hwnd) do |hwnd|
-                locators_match?(locators, control_properties(hwnd, locators))
-              end
-              raise UnknownElementException, "Element with #{locators.inspect} does not exist" if (hwnd == 0) or (hwnd == nil)
-              uia_control = UiaDll::element_from_handle(hwnd)
-          end
-          uia_control
-        end
-
-        def new_pid
-          UiaDll::current_process_id(uia_control())
-        end
-
-        def display_tree
-          root_element = UiaDll::element_from_handle(hwnd)
-
-          root_name = FFI::MemoryPointer.new :char, UiaDll::get_name(root_element, nil) + 1
-          UiaDll::get_name(root_element, root_name)
-
-          [root_name.read_string.inspect, gather_children(root_element)]
-        end
-
-        def gather_children(root_element)
-          element_tree = []
-
-          child_count = count_children(root_element)
-          children = FFI::MemoryPointer.new :pointer, child_count
-          UiaDll::find_children(root_element, children)
-
-          children.read_array_of_pointer(child_count).each do |child|
-            child_name = FFI::MemoryPointer.new :char, UiaDll::get_name(child, nil) + 1
-            UiaDll::get_name(child, child_name)
-
-            grandchild_count = count_children(child)
-
-            if grandchild_count > 0
-              element_tree << [child_name.read_string, gather_children(child)]
-            else
-              element_tree << child_name.read_string
-            end
-          end
-
-          element_tree
-        end
-
         def count_children(element)
           UiaDll::find_children(element, nil)
-        end
-
-        def gather_children_classes(root_element)
-          element_tree = []
-
-          child_count = count_children(root_element)
-          children = FFI::MemoryPointer.new :pointer, child_count
-          UiaDll::find_children(root_element, children)
-
-          children.read_array_of_pointer(child_count).each do |child|
-            child_name = FFI::MemoryPointer.new :char, UiaDll::get_class_name(child, nil) + 1
-            UiaDll::get_class_name(child, child_name)
-
-            grandchild_count = count_children(child)
-
-            if grandchild_count > 0
-              element_tree << [child_name.read_string, gather_children_classes(child)]
-            else
-              element_tree << child_name.read_string
-            end
-          end
-
-          element_tree
-        end
-
-        def get_focused_element
-          UiaDll::get_focused_element()
         end
 
         def bounding_rectangle

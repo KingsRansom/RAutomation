@@ -3,21 +3,21 @@ module RAutomation
     module MsUia
       class Cell
         include Locators
-        attr_reader :row, :column, :hwnd
+        attr_reader :row, :column, :search_information
 
         def initialize(window, locators)
-          @hwnd = window.hwnd
+          @search_information = window.search_information
           @locators = extract(locators)
           @row = window.row
           @column = @locators[:index] || 0
         end
 
         def exists?
-          UiaDll::data_item_exists hwnd, row, column
+          UiaDll::table_coordinate_valid? search_information, row, column
         end
 
         def value
-          UiaDll::cell_value_at hwnd, row, column
+          UiaDll::table_value_at search_information, row, column
         end
 
         alias_method :text, :value
@@ -27,7 +27,7 @@ module RAutomation
       class Row
         include Locators
         extend ElementCollections
-        attr_reader :hwnd
+        attr_reader :search_information
 
         has_many :cells
 
@@ -42,7 +42,7 @@ module RAutomation
         end
 
         def initialize(window, locators)
-          @hwnd = window.hwnd
+          @search_information = window.search_information
           @locators = extract(locators)
         end
 
@@ -51,11 +51,11 @@ module RAutomation
         end
 
         def value
-          UiaDll::cell_value_at @hwnd, @locators[:index]
+          UiaDll::table_value_at search_information, @locators[:index]
         end
 
         def exists?
-          UiaDll::data_item_exists(@hwnd, @locators[:index])
+          UiaDll::table_coordinate_valid?(search_information, @locators[:index])
         end
 
         def self.locators_match?(locators, item)
@@ -87,60 +87,25 @@ module RAutomation
         end
 
         def strings
-          rows = []
-          header_columns = []
+          headers = UiaDll.table_headers(search_information)
+          values = UiaDll.table_values(search_information)
+          return values if headers.empty?
 
-          raise "Not a list control" unless of_type_table?
-
-
-          children_count = count_children(uia_element)
-
-          children = FFI::MemoryPointer.new :pointer, children_count
-          UiaDll::find_children(uia_element, children)
-
-
-          children.read_array_of_pointer(children_count).each do |child|
-            grandchildren_count = count_children(child)
-
-            if grandchildren_count > 0
-
-              grandchildren = FFI::MemoryPointer.new :pointer, grandchildren_count
-              UiaDll::find_children(child, grandchildren)
-
-              grandchildren.read_array_of_pointer(grandchildren_count).each do |grandchild|
-                grandchild_name = FFI::MemoryPointer.new :char, UiaDll::get_name(grandchild, nil) + 1
-                UiaDll::get_name(grandchild, grandchild_name)
-                header_columns.push grandchild_name.read_string
-              end
-            else
-              grandchild_name = FFI::MemoryPointer.new :char, UiaDll::get_name(child, nil) + 1
-              UiaDll::get_name(child, grandchild_name)
-              header_columns = grandchild_name.read_string
-            end
-
-            rows.push header_columns
-            header_columns = []
-          end
-
-          rows
+          all_strings = [] << headers
+          values.each_slice(headers.count) {|r| all_strings << r }
+          all_strings
         end
 
-#        def select(row)
-#          Functions.select_table_row(Window.oleacc_module_handle, Functions.control_hwnd(@window.hwnd, @locators), row)
-#        end
-
-        def select(index)
-          UiaDll::select_data_item hwnd, index - 1
+        def select(which_item)
+          UiaDll::table_select search_information, which_item
         end
 
-        #todo - replace with UIA version
-        def selected?(row)
-          state = Functions.get_table_row_state(Window.oleacc_module_handle, hwnd, row)
-          state & Constants::STATE_SYSTEM_SELECTED != 0
+        def selected?(which_item)
+          UiaDll::table_row_is_selected search_information, which_item
         end
 
         def row_count
-          UiaDll::get_data_item_count hwnd
+          UiaDll::table_row_count search_information
         end
 
         def exist?
@@ -152,13 +117,6 @@ module RAutomation
         end
 
         alias_method :exists?, :exist?
-
-        private
-
-        def count_children(element)
-          UiaDll::find_children(element, nil)
-        end
-
       end
     end
   end

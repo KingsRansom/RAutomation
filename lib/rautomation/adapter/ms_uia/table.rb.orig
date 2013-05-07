@@ -1,0 +1,193 @@
+module RAutomation
+  module Adapter
+    module MsUia
+      class Cell
+        include Locators
+        attr_reader :row, :column, :search_information
+
+        def initialize(window, locators)
+          @search_information = window.search_information
+          @locators = extract(locators)
+          @row = window.row
+          @column = @locators[:index] || 0
+        end
+
+        def exists?
+<<<<<<< HEAD
+          UiaDll::data_item_exists hwnd, row, column
+        end
+
+        def value
+          UiaDll::cell_value_at hwnd, row, column
+=======
+          UiaDll::table_coordinate_valid? search_information, row, column
+        end
+
+        def value
+          UiaDll::table_value_at search_information, row, column
+>>>>>>> upstream/master
+        end
+
+        alias_method :text, :value
+        alias_method :index, :column
+      end
+
+      class Row
+        include Locators
+        extend ElementCollections
+        attr_reader :search_information
+
+        has_many :cells
+
+        def cells(locators={})
+          Cells.new(self, locators).select do |cell|
+            Row.locators_match? locators, cell
+          end
+        end
+
+        def cell(locators={})
+          cells(locators).first
+        end
+
+        def initialize(window, locators)
+          @search_information = window.search_information
+          @locators = extract(locators)
+        end
+
+        def index
+          @locators[:index] || 0
+        end
+
+        def value
+<<<<<<< HEAD
+          UiaDll::cell_value_at @hwnd, @locators[:index]
+        end
+
+        def exists?
+          UiaDll::data_item_exists(@hwnd, @locators[:index])
+=======
+          UiaDll::table_value_at search_information, @locators[:index]
+        end
+
+        def exists?
+          UiaDll::table_coordinate_valid?(search_information, @locators[:index])
+>>>>>>> upstream/master
+        end
+
+        def self.locators_match?(locators, item)
+          locators.all? do |locator, value|
+            return item.value =~ value if value.is_a? Regexp
+            return item.send(locator) == value
+          end
+        end
+
+        alias_method :text, :value
+        alias_method :row, :index
+      end
+
+      class Table < Control
+        include WaitHelper
+        include Locators
+        extend ElementCollections
+
+        has_many :rows
+
+        def row(locators={})
+          rows(locators).first
+        end
+
+        def rows(locators={})
+          Rows.new(self, locators).select do |row|
+            Row.locators_match? locators, row
+          end
+        end
+
+        def strings
+<<<<<<< HEAD
+          rows = []
+          header_columns = []
+=======
+          headers = UiaDll.table_headers(search_information)
+          values = UiaDll.table_values(search_information)
+          return values if headers.empty?
+>>>>>>> upstream/master
+
+          raise "Not a list control" unless of_type_table?
+
+
+          children_count = count_children(uia_element)
+
+          children = FFI::MemoryPointer.new :pointer, children_count
+          UiaDll::find_children(uia_element, children)
+
+
+          children.read_array_of_pointer(children_count).each do |child|
+            grandchildren_count = count_children(child)
+
+            if grandchildren_count > 0
+
+              grandchildren = FFI::MemoryPointer.new :pointer, grandchildren_count
+              UiaDll::find_children(child, grandchildren)
+
+              grandchildren.read_array_of_pointer(grandchildren_count).each do |grandchild|
+                grandchild_name = FFI::MemoryPointer.new :char, UiaDll::get_name(grandchild, nil) + 1
+                UiaDll::get_name(grandchild, grandchild_name)
+                header_columns.push grandchild_name.read_string
+              end
+            else
+              grandchild_name = FFI::MemoryPointer.new :char, UiaDll::get_name(child, nil) + 1
+              UiaDll::get_name(child, grandchild_name)
+              header_columns = grandchild_name.read_string
+            end
+
+            rows.push header_columns
+            header_columns = []
+          end
+
+          rows
+        end
+
+<<<<<<< HEAD
+#        def select(row)
+#          Functions.select_table_row(Window.oleacc_module_handle, Functions.control_hwnd(@window.hwnd, @locators), row)
+#        end
+
+        def select(index)
+          UiaDll::select_data_item hwnd, index - 1
+        end
+
+        #todo - replace with UIA version
+        def selected?(row)
+          state = Functions.get_table_row_state(Window.oleacc_module_handle, hwnd, row)
+          state & Constants::STATE_SYSTEM_SELECTED != 0
+        end
+
+        def row_count
+          UiaDll::get_data_item_count hwnd
+=======
+        def select(which_item)
+          UiaDll::table_select search_information, which_item
+        end
+
+        def selected?(which_item)
+          UiaDll::table_row_is_selected search_information, which_item
+        end
+
+        def row_count
+          UiaDll::table_row_count search_information
+>>>>>>> upstream/master
+        end
+
+        def exist?
+          super && of_type_table?
+        end
+
+        def of_type_table?
+          matches_type?(Constants::UIA_LIST_CONTROL_TYPE) || matches_type?(Constants::UIA_DATA_GRID_CONTROL_TYPE)
+        end
+
+        alias_method :exists?, :exist?
+      end
+    end
+  end
+end

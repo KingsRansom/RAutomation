@@ -1,0 +1,121 @@
+module RAutomation
+  module Adapter
+    module MsUia
+
+      class SelectList < Control
+        include WaitHelper
+        include Locators
+
+        class SelectListOption
+          attr_accessor :text, :index
+
+          def initialize(select_list, text, index)
+            @select_list = select_list
+            @text        = text
+            @index       = index
+          end
+
+          def selected?
+<<<<<<< HEAD
+            @index == UiaDll::get_combobox_selected_index(@select_list.control_hwnd)
+=======
+            @index == UiaDll::select_list_selected_index(@select_list.search_information)
+>>>>>>> upstream/master
+          end
+
+          def select
+            @select_list.assert_enabled
+<<<<<<< HEAD
+            UiaDll::select_combo_by_index @select_list.control_hwnd, @index
+=======
+            UiaDll::select_list_select_index @select_list.search_information, @index
+>>>>>>> upstream/master
+          end
+
+          alias_method :set, :select
+        end
+
+        def set(value)
+<<<<<<< HEAD
+          list      = UiaDll::element_from_handle(@hwnd)
+          UiaDll::set_value(list, value)
+=======
+          UiaDll::select_list_select_value(search_information, value)
+>>>>>>> upstream/master
+        end
+
+        def options(options = {})
+          items = []
+
+          select_options = UiaDll::select_options(search_information)
+          select_options.each_with_index do |item, item_no|
+            if options[:text]
+              items.push(SelectListOption.new(self, item, item_no)) if options[:text] == item
+            else
+              items.push(SelectListOption.new(self, item, item_no))
+            end
+          end
+
+          items
+        end
+
+        def value
+          UiaDll::selection(search_information)
+        end
+
+        def option(options)
+          UiaDll::select_options(search_information).each_with_index do |item, item_no|
+            return SelectListOption.new(self, item, item_no) if options[:text] == item
+          end
+
+          nil
+        end
+
+        def select(index)
+<<<<<<< HEAD
+          UiaDll::select_combo_by_index @hwnd, index
+        end
+
+        def list_item_height
+          Functions.send_message(@hwnd, Constants::CB_GETITEMHEIGHT, 0 ,nil)
+        end
+
+        def dropbox_boundary
+          boundary = FFI::MemoryPointer.new :long, 4
+
+          Functions.send_message(@hwnd, Constants::CB_GETDROPPEDCONTROLRECT, 0 ,boundary)
+
+          boundary.read_array_of_long(4)
+        end
+
+        def get_top_index
+          Functions.send_message(@hwnd, Constants::CB_GETTOPINDEX, 0 ,nil)
+        end
+
+        def scroll_to_item(row)
+          Functions.send_message(@hwnd, Constants::CB_SETTOPINDEX , row ,nil)
+=======
+          UiaDll::select_list_select_index search_information, index
+>>>>>>> upstream/master
+        end
+
+        def exist?
+          super && matches_type?(Constants::UIA_COMBOBOX_CONTROL_TYPE)
+        end
+
+        alias_method :exists?, :exist?
+
+        private
+
+        def item_count
+<<<<<<< HEAD
+          UiaDll::get_combobox_count(@hwnd)
+=======
+          UiaDll::select_list_count(search_information)
+>>>>>>> upstream/master
+        end
+
+      end
+    end
+  end
+end

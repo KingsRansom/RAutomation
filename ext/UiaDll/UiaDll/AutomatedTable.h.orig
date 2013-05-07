@@ -1,0 +1,37 @@
+#pragma once
+<<<<<<< HEAD
+=======
+#include "AutomationControl.h"
+#include "AutomationFinder.h"
+#include "StringHelper.h"
+
+>>>>>>> upstream/master
+using namespace System::Windows::Automation;
+
+ref class AutomatedTable : AutomationControl
+{
+public:
+	AutomatedTable(const HWND windowHandle);
+<<<<<<< HEAD
+	bool Exists(const char* whichItem);
+=======
+	AutomatedTable(const FindInformation& finderInformation);
+>>>>>>> upstream/master
+	bool Exists(const int whichItemIndex, const int whichColumnIndex);
+	String^ ValueAt(const int whichItemIndex, const int whichColumnIndex);
+	void Select(const int dataItemIndex);
+
+	property int RowCount {
+		int get();
+	}
+
+private:
+<<<<<<< HEAD
+	AutomationElement^ _tableControl;
+=======
+	AutomationFinder^ _finder;
+>>>>>>> upstream/master
+	bool Exists(Condition^ condition);
+	AutomationElement^ DataItemAt(const int whichItemIndex, const int whichItemRow);
+};
+
