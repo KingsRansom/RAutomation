@@ -170,7 +170,7 @@ module RAutomation
               send_key arg
             end
           end
-          sleep(0.45)
+          sleep(0.35)
         end
 
         # @see RAutomation::Window#close
