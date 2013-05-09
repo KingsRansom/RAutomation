@@ -40,7 +40,7 @@ module RAutomation
           :arrow_down    => 0x28,
           :insert        => 0x2D,
           :delete        => 0x2E,
-          :semicolon     => 0x3B,
+          :semicolon     => 0x3A,
           :colon         => 0x3A,
           :equals        => 0x3D,
           :numpad0       => 0x60,
