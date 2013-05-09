@@ -163,14 +163,14 @@ module RAutomation
                 else
                   pressed_keys << press_key(k)
                 end
-                sleep(0.2)
+                sleep(0.25)
                 pressed_keys
               end
             else
               send_key arg
             end
           end
-          sleep(0.35)
+          sleep(0.25)
         end
 
         # @see RAutomation::Window#close
